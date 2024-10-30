@@ -6,9 +6,13 @@ from typing import List, Dict, Any
 import os
 from dotenv import load_dotenv
 
-# openai 키
-openai.api_key = os.environ["OPENAI_API_KEY"]
+# 환경변수 로드
+load_dotenv()
 
+# API 키를 환경변수에서 가져옴 (Heroku config vars에서 설정한 값을 사용)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# FastAPI 앱 초기화
 app = FastAPI(
     title="Story Generator API",
     description="An API that generates stories using OpenAI's GPT-4",
@@ -37,13 +41,17 @@ async def openai_endpoint(chat_input: ChatInput):
             raise HTTPException(status_code=500, detail="OpenAI API key not configured")
             
         messages = prompt.format_messages(topic=chat_input.topic)
-        llm = ChatOpenAI(model="gpt-4")
+        llm = ChatOpenAI(
+            api_key=OPENAI_API_KEY,
+            model="gpt-4"
+        )
         response = llm.invoke(messages)
         
         return {"response": response.content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Heroku는 $PORT 환경변수를 제공합니다
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
