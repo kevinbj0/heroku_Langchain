@@ -6,11 +6,8 @@ from typing import List, Dict, Any
 import os
 from dotenv import load_dotenv
 
-# 환경변수 로드
-load_dotenv()
-
-# API 키를 환경변수에서 가져옴
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# openai 키
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
 app = FastAPI(
     title="Story Generator API",
